@@ -1,0 +1,18 @@
+pkgname=linux-api-headers
+pkgver=7.2.2
+pkgrel=1
+pkgdesc="Kernel headers sanitized for use in userspace"
+arch=('x86_64')
+url="https://www.kernel.org"
+license=('GPL-2.0-only')
+makedepends=('rsync')
+source=("https://www.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-${pkgver}.tar.xz")
+sha256sums=('7d0e7ce14f98c43efe880cffbf354a59be45928fdf7170d7333c374ae91c0d83')
+
+build() {
+  make -C "linux-${pkgver}" mrproper
+}
+
+package() {
+  make -C "linux-${pkgver}" INSTALL_HDR_PATH="${pkgdir}/usr" headers_install
+}

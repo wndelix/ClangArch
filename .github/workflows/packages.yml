@@ -1,0 +1,56 @@
+name: Build bootstrap package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/packages.yml"
+      - "bootstrap/seed/**"
+      - "repository/**"
+      - "scripts/build-package.sh"
+      - "scripts/bootstrap/build-package-in-seed.sh"
+      - "scripts/ci/**"
+      - "tests/packages/**"
+      - "tests/scripts/**"
+
+concurrency:
+  group: bootstrap-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Build system/linux-api-headers
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run infrastructure tests
+        shell: bash
+        run: |
+          bash tests/scripts/build-package.sh
+          bash tests/scripts/build-package-in-seed.sh
+          bash tests/scripts/validate-linux-api-headers.sh
+
+      - name: Free runner disk space
+        shell: bash
+        run: bash scripts/ci/free-disk-space.sh
+
+      - name: Build linux-api-headers
+        shell: bash
+        run: bash scripts/build-package.sh system linux-api-headers
+
+      - name: Upload linux-api-headers package
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-system-linux-api-headers
+          path: out/packages/system/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 3
