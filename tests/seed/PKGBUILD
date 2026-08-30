@@ -1,0 +1,14 @@
+pkgname=clangarch-bootstrap-smoke
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='bootstrap environment smoke test'
+arch=('any')
+license=('MIT')
+source=('clangarch-bootstrap-smoke')
+sha256sums=('SKIP')
+
+package() {
+    install -Dm755 \
+        "${srcdir}/clangarch-bootstrap-smoke" \
+        "${pkgdir}/usr/bin/clangarch-bootstrap-smoke"
+}
