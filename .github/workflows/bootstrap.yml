@@ -1,0 +1,46 @@
+name: Bootstrap ClangArch
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bootstrap.yml"
+      - "bootstrap/**"
+      - "scripts/bootstrap/**"
+      - "scripts/ci/**"
+      - "tests/seed/**"
+
+concurrency:
+  group: clangarch-bootstrap-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  seed:
+    name: Validate Arch seed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        shell: bash
+        run: bash scripts/ci/free-disk-space.sh
+
+      - name: Run ClangArch seed smoke test
+        shell: bash
+        run: bash scripts/bootstrap/run-seed.sh
+
+      - name: Upload smoke-test package
+        uses: actions/upload-artifact@v4
+        with:
+          name: clangarch-bootstrap-smoke
+          path: out/seed/*.pkg.tar.zst
+          if-no-files-found: error
+          retention-days: 3
